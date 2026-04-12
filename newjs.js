@@ -1,5 +1,5 @@
 // ===============================
-// 🆕 sanitize + hidden cleaner
+// 🆕 Sanitization
 // ===============================
 function sanitizeInput(text) {
   return text
@@ -14,9 +14,17 @@ function removeHiddenOnly(text) {
 
 
 // ===============================
-// 🆕 regex validation
+// ✅ Validation ONLY for textarea + subject
 // ===============================
 function validateField(input) {
+
+  var allowed =
+    input.tagName.toLowerCase() === 'textarea' ||
+    input.id === 'first_subject_input_text' ||
+    input.id === 'second_subject_input_text';
+
+  if (!allowed) return true;
+
   var pattern = /^$|^[\p{Script=Arabic}a-zA-Z0-9 \-_!@,():.?+~\r\n]+$/u;
 
   var value = input.value;
@@ -30,9 +38,9 @@ function validateField(input) {
 
 
 // ===============================
-// 🆕 أثناء الكتابة (UX آمن)
+// 🔥 Live input (ONLY textarea + subject)
 // ===============================
-$('input, textarea').on('input', function () {
+$('textarea, #first_subject_input_text, #second_subject_input_text').on('input', function () {
   var val = $(this).val();
 
   var cleaned = removeHiddenOnly(val);
@@ -46,9 +54,9 @@ $('input, textarea').on('input', function () {
 
 
 // ===============================
-// 🆕 عند الخروج من الحقل
+// 🧹 Blur cleanup
 // ===============================
-$('input, textarea').on('blur', function () {
+$('textarea, #first_subject_input_text, #second_subject_input_text').on('blur', function () {
   var cleaned = sanitizeInput($(this).val());
   $(this).val(cleaned);
 
@@ -57,16 +65,17 @@ $('input, textarea').on('blur', function () {
 
 
 // ===============================
-// الحالة الأصلية
+// 📦 state
 // ===============================
 var state = { files: [], filesArr: [], filesCount: 0 };
 
 
 // ===============================
-// AJAX + Bootstrap validation
+// 🚀 FORM SUBMIT (Bootstrap 4 + AJAX)
 // ===============================
 (function () {
   'use strict';
+
   window.addEventListener('load', function () {
 
     var forms = document.getElementsByClassName('needs-validation');
@@ -78,36 +87,44 @@ var state = { files: [], filesArr: [], filesCount: 0 };
         event.preventDefault();
         event.stopPropagation();
 
-        // 🆕 تنظيف جميع الحقول قبل أي شيء
-        $('input, textarea').each(function () {
+        // ===============================
+        // 🧹 sanitize ONLY textarea + subject
+        // ===============================
+        $('textarea, #first_subject_input_text, #second_subject_input_text').each(function () {
           var cleaned = sanitizeInput($(this).val());
           $(this).val(cleaned);
         });
 
-        // 🆕 تحقق إضافي regex
-        var inputs = form.querySelectorAll('input, textarea');
+        // ===============================
+        // 🔍 custom validation (ONLY textarea + subject)
+        // ===============================
         var customValid = true;
 
-        inputs.forEach(function (input) {
-          if (!validateField(input)) {
-            customValid = false;
-          }
-        });
+        form.querySelectorAll('textarea, #first_subject_input_text, #second_subject_input_text')
+          .forEach(function (input) {
+            if (!validateField(input)) {
+              customValid = false;
+            }
+          });
 
+        // ===============================
+        // ❌ stop if invalid
+        // ===============================
         if (form.checkValidity() === false || !customValid) {
           $('#send-message').attr('disabled', false);
         }
         else {
 
           // ===============================
-          // 🆕 القيم بعد التنظيف
+          // 📤 collect values
           // ===============================
           var first_name = $('#name_input_text').val();
           var phone = $('#phone_input_text').val();
           var email = $('#email_input_text').val();
 
-          var subject = $('#first_subject_input_text').text() ?
-            $("select.custom-select").children("option:selected").text() + " : " + $('#second_subject_input_text').val()
+          var subject = $('#first_subject_input_text').text()
+            ? $("select.custom-select").children("option:selected").text()
+              + " : " + $('#second_subject_input_text').val()
             : $("select.custom-select").children("option:selected").text();
 
           var msg = $('#msq_input_text').val();
@@ -127,6 +144,9 @@ var state = { files: [], filesArr: [], filesCount: 0 };
 
           formData.append('lan', lan);
 
+          // ===============================
+          // 📎 file upload
+          // ===============================
           if (state.filesArr.length > 0) {
             for (var x = 0; x < state.filesArr.length; x++) {
               var f = x + 1;
@@ -136,6 +156,9 @@ var state = { files: [], filesArr: [], filesCount: 0 };
             }
           }
 
+          // ===============================
+          // 🚀 AJAX
+          // ===============================
           $.ajax({
             url: "/submit/",
             type: "POST",
@@ -152,9 +175,11 @@ var state = { files: [], filesArr: [], filesCount: 0 };
             },
 
             success: function (data) {
+
               $('#send-message').attr('disabled', false);
 
               if (data.success) {
+
                 $('#captcha_form')[0].reset();
 
                 $('#first_name_error').text('');
@@ -216,6 +241,7 @@ var state = { files: [], filesArr: [], filesCount: 0 };
             },
 
             error: function () {
+
               $("#mail-status").html(
                 $('html')[0].lang === "ar"
                   ? '<span style="color:red">حدث خطأ ما !</span>'
