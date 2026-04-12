@@ -3,7 +3,7 @@
 // ===============================
 // يتخطى reCAPTCHA تلقائياً عند العمل محلياً (localhost / 127.0.0.1)
 // في السيرفر الحقيقي سيعمل التحقق بشكل طبيعي 100%
-var pattern = new RegExp("^(?:$|[\\p{Arabic}a-zA-Z0-9_ !(),:؟?.ـ@+\\r\\n-]+)$", "u");
+var pattern = /^(?:$|[\p{Arabic}a-zA-Z0-9_!\(\),:؟?.ـ@+\r\n -]+)$/u;
 const IS_DEV_ENV = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname) || window.location.protocol === 'file:';
 
 const element = document.querySelector('#captcha_form');
