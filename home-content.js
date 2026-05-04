@@ -66,7 +66,7 @@
     var readMoreText = currentLang === 'ar' ? 'اقرأ المزيد' : 'Read More';
     var arrowDir = currentLang === 'ar' ? 'left' : 'right';
     var imgPath = resolveImagePath(item);
-    var readHref = 'news/index.html?id=' + encodeURIComponent(item.id);
+    var readHref = 'featured-news/index.html?id=' + encodeURIComponent(item.id);
 
     var titleEsc = String(item.title || '').replace(/"/g, '&quot;');
     return (
